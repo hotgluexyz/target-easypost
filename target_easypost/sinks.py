@@ -13,10 +13,6 @@ class ShipmentSink(EasypostStream):
         endpoint = f"/{self.name}"
         method = "POST"
 
-        if is_update:
-            endpoint = f"/{self.name}/{record_id}"
-            method = "PATCH"
-
         response = self.request_api(method, endpoint, request_data=record)
         res_json = response.json()
         id = res_json.get("id")
@@ -27,8 +23,8 @@ class ShipmentSink(EasypostStream):
         if not rates:
             raise ValueError("No rates found for shipment")
         first_rate = rates[0]
-        buy_lavel_payload = {"rate": {"id": first_rate.get("id")}}
-        self.request_api("POST", f"{self.endpoint}/{id}/buy", request_data=buy_lavel_payload)
+        buy_label_payload = {"rate": {"id": first_rate.get("id")}}
+        self.request_api("POST", f"{self.endpoint}/{id}/buy", request_data=buy_label_payload)
 
         state_updates = {}
         if is_update and response.ok:

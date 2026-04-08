@@ -4,7 +4,7 @@
 
 ## Overview
 
-This target syncs data to EasyPost over their REST API. It uses a generic sink: each Singer stream name is sent to `POST /{stream}` for creates and `PATCH /{stream}/{id}` when a record includes an `id` (update).
+This target writes **shipments** to EasyPost only. For each record on the `shipments` Singer stream it creates a shipment with `POST /shipments` (relative to the v2 base URL below), then buys a label with `POST /shipments/{id}/buy` using the **first** rate returned. **Updates are not supported**
 
 ## Installation
 
@@ -53,11 +53,11 @@ Confirm paths and behavior against the [EasyPost API documentation](https://docs
 
 ## Supported streams
 
-There is no fixed list of streams in code: any stream name from the tap is used as the API path segment. Payload shape must match what the EasyPost API expects for that resource.
+| Stream      | Behavior |
+|-------------|----------|
+| `shipments` | `POST /shipments` with the record body as JSON. If EasyPost returns no `rates`, the target raises an error. Otherwise it buys a label with the first rate (`POST /shipments/{id}/buy`). |
 
-**Create:** records without an `id` (or with `id` removed before send, depending on stream) are sent with `POST /{stream_name}` as a JSON array with one element.
-
-**Update:** records that still have an `id` after processing use `PATCH /{stream_name}/{id}` with the record body.
+Only the `shipments` stream is implemented. Other stream names are not handled by this target. Payload shape must match the [EasyPost Shipment object](https://docs.easypost.com/docs/shipments) for creation.
 
 ## Usage
 
