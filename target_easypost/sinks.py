@@ -9,6 +9,9 @@ class ShipmentSink(EasypostStream):
     def upsert_record(self, record: dict, context: dict):
         endpoint = f"/{self.name}"
         method = "POST"
+        id = record.get("id")
+        if id:
+            raise ValueError("Shipment doesn't allow updates, remove id from record to create a new shipment")
 
         response = self.request_api(method, endpoint, request_data=record)
         res_json = response.json()
